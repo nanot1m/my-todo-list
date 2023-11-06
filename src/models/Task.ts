@@ -8,7 +8,8 @@ export const TaskJSON = z.object({
 	title: z.string(),
 	description: z.string(),
 	status: z.nativeEnum(TaskStatus),
-	dueDate: z.string().nullable(),
+	dueDate: z.date().nullable(),
+	createdAt: z.date(),
 })
 
 export class Task {
@@ -16,6 +17,7 @@ export class Task {
 	@observable accessor title: string
 	@observable accessor description: string
 	@observable accessor status: TaskStatus
+	@observable accessor createdAt: Date
 	@observable accessor dueDate: Date | null = null
 
 	constructor(
@@ -23,12 +25,14 @@ export class Task {
 		title: string,
 		description: string,
 		status: TaskStatus,
+		createdAt: Date,
 		dueDate: Date | null = null,
 	) {
 		this.id = id
 		this.title = title
 		this.description = description
 		this.status = status
+		this.createdAt = createdAt
 		this.dueDate = dueDate
 	}
 
@@ -53,7 +57,8 @@ export class Task {
 			json.title,
 			json.description,
 			json.status,
-			json.dueDate ? new Date(json.dueDate) : null,
+			json.createdAt,
+			json.dueDate,
 		)
 	}
 }
