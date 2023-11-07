@@ -31,6 +31,12 @@ export class TaskList {
 		this.tasks.splice(this.tasks.indexOf(task), 1)
 	}
 
+	toJSON() {
+		return {
+			tasks: this.tasks.map((task) => task.toJSON()),
+		}
+	}
+
 	static fromJSON(json: TaskListJSON): TaskList {
 		return new TaskList(
 			json.tasks.map((taskJson) => Task.fromJSON(taskJson)),

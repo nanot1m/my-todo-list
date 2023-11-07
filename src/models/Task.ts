@@ -51,6 +51,17 @@ export class Task {
 		this.status = status
 	}
 
+	toJSON() {
+		return {
+			id: this.id,
+			title: this.title,
+			description: this.description,
+			status: this.status,
+			createdAt: this.createdAt,
+			dueDate: this.dueDate,
+		}
+	}
+
 	static fromJSON(json: TaskJSON): Task {
 		return new Task(
 			json.id,

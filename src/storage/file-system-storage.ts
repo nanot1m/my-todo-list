@@ -2,7 +2,6 @@ import { fileOpen, fileSave } from "browser-fs-access"
 import { get as idbGet, set as idbSet } from "idb-keyval"
 
 import { AppState, AppStateJSON } from "../models/AppState"
-import { upgradeState } from "./"
 
 const IDB_FILE_HANDLE_KEY = "idb_file_handle_key"
 
@@ -21,7 +20,7 @@ export async function saveToFile(
 	name: string = "Untitled",
 	handle?: FileSystemFileHandle,
 ) {
-	const blob = new Blob([state.toJSONString()], {
+	const blob = new Blob([JSON.stringify(state.toJSON())], {
 		type: "application/json",
 	})
 	const fileHandle = await fileSave(
@@ -48,8 +47,8 @@ export async function loadFromFile() {
 		extensions: [".mtl"],
 	})
 	return {
-		state: upgradeState(
-			AppState.fromJSON(AppStateJSON.parse(await blob.text())),
+		state: AppState.fromJSON(
+			AppStateJSON.parse(JSON.parse(await blob.text())),
 		),
 		name: blob.name,
 		handle: blob.handle,

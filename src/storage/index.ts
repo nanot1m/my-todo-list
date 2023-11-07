@@ -1,7 +1,5 @@
-import { AppState, AppStateJSON } from "../models/AppState"
+import { AppState } from "../models/AppState"
 import { TaskList } from "../models/TaskList"
-import { restoreFileHandle } from "./file-system-storage"
-import { observable, runInAction, action } from "mobx"
 
 export const APP_VERSION = "0"
 
@@ -17,48 +15,51 @@ const UPGRADES: Record<number, StateUpdate> = {
 	},
 }
 
+export interface IStorageManager {
+	getState(): Promise<AppState>
+	setState(state: AppState): void
+}
+
+export interface IStorageProvider {
+	getState(): Promise<AppState>
+	setState(state: AppState): void
+}
+
+export function createStorageManager(
+	storageProvider: IStorageProvider,
+): IStorageManager {
+	return {
+		async getState() {
+			try {
+				const stateFromStorage = await storageProvider.getState()
+				if (stateFromStorage.version !== APP_VERSION) {
+					const upgradedState = upgradeState(stateFromStorage)
+					storageProvider.setState(upgradedState)
+					return upgradedState
+				}
+				return stateFromStorage
+			} catch (ex) {
+				return getInitialState(APP_VERSION)
+			}
+		},
+		setState(state) {
+			storageProvider.setState(state)
+		},
+	}
+}
+
+export function getInitialState(version: string = APP_VERSION): AppState {
+	return new AppState(version, new TaskList([]))
+}
+
 export function upgradeState(state: AppState): AppState {
 	while (state.version !== APP_VERSION) {
 		const version = Number(state.version ?? 0)
 		if (version in UPGRADES) {
 			state = UPGRADES[version](state)
 		} else {
-			state = new AppState(APP_VERSION, new TaskList([]))
+			state = getInitialState(APP_VERSION)
 		}
 	}
 	return state
-}
-
-export class StateStorage {
-	@observable accessor state: AppState | undefined
-	@observable accessor status: "loading" | "loaded" | "error" = "loading"
-
-	@observable accessor fileHandle: FileSystemFileHandle | undefined =
-		undefined
-
-	constructor(state?: AppState) {
-		this.state = state
-	}
-
-	@action
-	async restoreFromFile(): Promise<void> {
-		this.status = "loading"
-		const fileHandle = await restoreFileHandle()
-		if (fileHandle) {
-			this.fileHandle = fileHandle
-			const file = await fileHandle.getFile()
-			const state = upgradeState(
-				AppState.fromJSON(AppStateJSON.parse(await file.text())),
-			)
-			runInAction(() => {
-				this.state = state
-				this.status = "loaded"
-			})
-		} else {
-			runInAction(() => {
-				this.state = new AppState(APP_VERSION, new TaskList([]))
-				this.status = "loaded"
-			})
-		}
-	}
 }

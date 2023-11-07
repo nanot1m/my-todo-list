@@ -1,5 +1,4 @@
 import { z } from "zod"
-import { toJS } from "mobx"
 
 import { TaskList, TaskListJSON } from "./TaskList"
 
@@ -19,11 +18,11 @@ export class AppState {
 		this.taskList = taskList
 	}
 
-	toJSONString() {
-		return JSON.stringify({
+	toJSON() {
+		return {
 			version: this.version,
-			taskList: toJS(this.taskList),
-		})
+			taskList: this.taskList.toJSON(),
+		}
 	}
 
 	static fromJSON(json: AppStateJSON): AppState {
