@@ -1,5 +1,6 @@
+import { action, observable } from "mobx"
 import { z } from "zod"
-import { observable, action } from "mobx"
+
 import { TaskStatus } from "./TaskStatus"
 
 export type TaskJSON = z.infer<typeof TaskJSON>

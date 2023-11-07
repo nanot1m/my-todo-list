@@ -47,9 +47,18 @@ export class StateStorage {
 	@action.bound
 	async saveFile() {
 		if (!this.state) return
+
+		if (
+			this.fileHandle &&
+			"requestPermission" in this.fileHandle &&
+			typeof this.fileHandle.requestPermission === "function"
+		) {
+			await this.fileHandle.requestPermission({ mode: "readwrite" })
+		}
+
 		const result = await saveToFile(
 			this.state,
-			"MyTodoList",
+			this.fileHandle?.name ?? "MyTodoList",
 			this.fileHandle,
 		)
 		runInAction(() => {

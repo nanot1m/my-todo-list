@@ -9,15 +9,73 @@ import {
 	IconButton,
 	Text,
 } from "@chakra-ui/react"
-import { useEffect } from "react"
-import { observer, useLocalObservable } from "mobx-react-lite"
+import { observer } from "mobx-react-lite"
+import { useEffect, useState } from "react"
 import {
 	AiFillFileAdd,
 	AiFillFileText,
 	AiOutlineDownload,
 } from "react-icons/ai"
 
-import { StateStorage } from "./storage/StateStorage"
+import { StateStorage } from "./storage/state-storage"
+
+const Header = ({ stateStorage }: { stateStorage: StateStorage }) => {
+	return (
+		<Box
+			as="header"
+			display="flex"
+			justifyContent="space-between"
+			alignItems="center"
+			mb={2}
+		>
+			<Heading as="h1">My todo list.</Heading>
+			<HStack>
+				<IconButton
+					aria-label="New file"
+					title="New file"
+					icon={<Icon as={AiFillFileAdd} />}
+					onClick={stateStorage.createNewFile}
+				/>
+				<IconButton
+					aria-label="Open file"
+					title="Open file"
+					icon={<Icon as={AiFillFileText} />}
+					onClick={stateStorage.openFile}
+				/>
+				<IconButton
+					aria-label="Save file"
+					title="Save file"
+					icon={<Icon as={AiOutlineDownload} />}
+					onClick={stateStorage.saveFile}
+				/>
+			</HStack>
+		</Box>
+	)
+}
+
+export const AutoSaveToggle = observer(
+	({ stateStorage }: { stateStorage: StateStorage }) => {
+		const [autoSave, setAutoSave] = useState(false)
+
+		return (
+			<Collapse in={Boolean(stateStorage.fileHandle)} animateOpacity>
+				{stateStorage.fileHandle && (
+					<Box display="flex" justifyContent="space-between" pb={2}>
+						<Text>{stateStorage.fileHandle.name}</Text>
+						<Checkbox
+							checked={autoSave}
+							onChange={(e) =>
+								setAutoSave(e.currentTarget.checked)
+							}
+						>
+							Autosave
+						</Checkbox>
+					</Box>
+				)}
+			</Collapse>
+		)
+	},
+)
 
 export const App = observer(
 	({ stateStorage }: { stateStorage: StateStorage }) => {
@@ -25,61 +83,10 @@ export const App = observer(
 			stateStorage.load()
 		}, [stateStorage])
 
-		const appState = useLocalObservable(() => ({
-			autoSave: false,
-			toggleAutoSave() {
-				this.autoSave = !this.autoSave
-			},
-		}))
-
 		return (
 			<Container py={8}>
-				<Box
-					as="header"
-					display="flex"
-					justifyContent="space-between"
-					alignItems="center"
-					mb={2}
-				>
-					<Heading as="h1">My todo list.</Heading>
-					<HStack>
-						<IconButton
-							aria-label="New file"
-							title="New file"
-							icon={<Icon as={AiFillFileAdd} />}
-							onClick={stateStorage.createNewFile}
-						/>
-						<IconButton
-							aria-label="Open file"
-							title="Open file"
-							icon={<Icon as={AiFillFileText} />}
-							onClick={stateStorage.openFile}
-						/>
-						<IconButton
-							aria-label="Save file"
-							title="Save file"
-							icon={<Icon as={AiOutlineDownload} />}
-							onClick={stateStorage.saveFile}
-						/>
-					</HStack>
-				</Box>
-				<Collapse in={Boolean(stateStorage.fileHandle)} animateOpacity>
-					{stateStorage.fileHandle && (
-						<Box
-							display="flex"
-							justifyContent="space-between"
-							pb={2}
-						>
-							<Text>{stateStorage.fileHandle.name}</Text>
-							<Checkbox
-								checked={appState.autoSave}
-								onChange={appState.toggleAutoSave}
-							>
-								Autosave
-							</Checkbox>
-						</Box>
-					)}
-				</Collapse>
+				<Header stateStorage={stateStorage} />
+				<AutoSaveToggle stateStorage={stateStorage} />
 			</Container>
 		)
 	},

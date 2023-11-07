@@ -1,5 +1,5 @@
 import { AppState, AppStateJSON } from "../models/AppState"
-import { APP_VERSION, getInitialState, IStorageProvider } from "./index"
+import { APP_VERSION, IStorageProvider, getInitialState } from "./index"
 
 const LS_KEY = "MyTodoListState"
 
