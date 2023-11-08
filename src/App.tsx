@@ -83,6 +83,12 @@ export const App = observer(
 			stateStorage.load()
 		}, [stateStorage])
 
+		useEffect(() => {
+			if (stateStorage.fileHandle?.name) {
+				document.title = `${stateStorage.fileHandle.name} - My todo list.`
+			}
+		}, [stateStorage.fileHandle])
+
 		return (
 			<Container py={8}>
 				<Header stateStorage={stateStorage} />
