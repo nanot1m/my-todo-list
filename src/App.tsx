@@ -1,5 +1,9 @@
 import {
 	Box,
+	Card,
+	CardBody,
+	CardFooter,
+	CardHeader,
 	Checkbox,
 	Collapse,
 	Container,
@@ -17,6 +21,9 @@ import {
 	AiOutlineDownload,
 } from "react-icons/ai"
 
+import { Task } from "./models/Task"
+import { TaskList } from "./models/TaskList"
+import { TaskStatus } from "./models/TaskStatus"
 import { StateStorage } from "./storage/state-storage"
 
 const Header = ({ stateStorage }: { stateStorage: StateStorage }) => {
@@ -77,6 +84,39 @@ export const AutoSaveToggle = observer(
 	},
 )
 
+export const TaskView = observer(({ task }: { task: Task }) => {
+	return (
+		<Card>
+			<CardHeader>{task.title}</CardHeader>
+			<CardBody>{task.description}</CardBody>
+			<CardFooter>
+				<Checkbox
+					checked={task.done}
+					onChange={(e) =>
+						task.setStatus(
+							e.currentTarget.checked
+								? TaskStatus.DONE
+								: TaskStatus.OPEN,
+						)
+					}
+				>
+					Done
+				</Checkbox>
+			</CardFooter>
+		</Card>
+	)
+})
+
+export const TaskListView = observer(({ taskList }: { taskList: TaskList }) => {
+	return (
+		<Box display="flex" flexDirection="column" gap={2}>
+			{taskList.tasks.map((task) => (
+				<TaskView key={task.id} task={task} />
+			))}
+		</Box>
+	)
+})
+
 export const App = observer(
 	({ stateStorage }: { stateStorage: StateStorage }) => {
 		useEffect(() => {
@@ -93,6 +133,9 @@ export const App = observer(
 			<Container py={8}>
 				<Header stateStorage={stateStorage} />
 				<AutoSaveToggle stateStorage={stateStorage} />
+				{stateStorage.state && (
+					<TaskListView taskList={stateStorage.state.taskList} />
+				)}
 			</Container>
 		)
 	},

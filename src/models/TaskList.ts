@@ -9,6 +9,15 @@ export const TaskListJSON = z.object({
 	tasks: z.array(TaskJSON),
 })
 
+function tasksCompareFn(a: Task, b: Task): number {
+	if (a.priority > b.priority) return -1
+	if (a.priority < b.priority) return 1
+	if (a.dueDate && b.dueDate) return a.dueDate.getTime() - b.dueDate.getTime()
+	if (a.dueDate) return -1
+	if (b.dueDate) return 1
+	return a.createdAt.getTime() - b.createdAt.getTime()
+}
+
 export class TaskList {
 	@observable accessor tasks: Task[]
 
@@ -18,7 +27,9 @@ export class TaskList {
 
 	@computed
 	get openTasks(): Task[] {
-		return this.tasks.filter((task) => task.status === TaskStatus.OPEN)
+		return this.tasks
+			.filter((task) => task.status === TaskStatus.OPEN)
+			.sort(tasksCompareFn)
 	}
 
 	@action

@@ -1,4 +1,4 @@
-import { action, observable } from "mobx"
+import { action, computed, observable } from "mobx"
 import { z } from "zod"
 
 import { TaskStatus } from "./TaskStatus"
@@ -11,6 +11,7 @@ export const TaskJSON = z.object({
 	status: z.nativeEnum(TaskStatus),
 	dueDate: z.date().nullable(),
 	createdAt: z.date(),
+	priority: z.number(),
 })
 
 export class Task {
@@ -19,7 +20,8 @@ export class Task {
 	@observable accessor description: string
 	@observable accessor status: TaskStatus
 	@observable accessor createdAt: Date
-	@observable accessor dueDate: Date | null = null
+	@observable accessor dueDate: Date | null
+	@observable accessor priority: number
 
 	constructor(
 		id: number,
@@ -28,6 +30,7 @@ export class Task {
 		status: TaskStatus,
 		createdAt: Date,
 		dueDate: Date | null = null,
+		priority: number = 0,
 	) {
 		this.id = id
 		this.title = title
@@ -35,6 +38,7 @@ export class Task {
 		this.status = status
 		this.createdAt = createdAt
 		this.dueDate = dueDate
+		this.priority = priority
 	}
 
 	@action
@@ -50,6 +54,21 @@ export class Task {
 	@action
 	setStatus(status: TaskStatus) {
 		this.status = status
+	}
+
+	@action
+	setDueDate(dueDate: Date | null) {
+		this.dueDate = dueDate
+	}
+
+	@action
+	setPriority(priority: number) {
+		this.priority = priority
+	}
+
+	@computed
+	get done(): boolean {
+		return this.status === TaskStatus.DONE
 	}
 
 	toJSON() {
@@ -71,6 +90,7 @@ export class Task {
 			json.status,
 			json.createdAt,
 			json.dueDate,
+			json.priority,
 		)
 	}
 }
