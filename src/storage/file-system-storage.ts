@@ -15,6 +15,15 @@ export function restoreFileHandle(): Promise<FileSystemFileHandle | undefined> {
 	return idbGet(IDB_FILE_HANDLE_KEY)
 }
 
+export async function requestAcessToFile(fileHandle: FileSystemFileHandle) {
+	if (
+		"requestPermission" in fileHandle &&
+		typeof fileHandle.requestPermission === "function"
+	) {
+		await fileHandle.requestPermission({ mode: "readwrite" })
+	}
+}
+
 export async function saveToFile(
 	state: AppState,
 	name: string = "Untitled",

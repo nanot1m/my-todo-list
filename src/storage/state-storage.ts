@@ -3,6 +3,7 @@ import { observable, runInAction, action } from "mobx"
 import { IStorageProvider, getInitialState } from "."
 import {
 	loadFromFile,
+	requestAcessToFile,
 	restoreFileHandle,
 	saveFileHandle,
 	saveToFile,
@@ -48,12 +49,8 @@ export class StateStorage {
 	async saveFile() {
 		if (!this.state) return
 
-		if (
-			this.fileHandle &&
-			"requestPermission" in this.fileHandle &&
-			typeof this.fileHandle.requestPermission === "function"
-		) {
-			await this.fileHandle.requestPermission({ mode: "readwrite" })
+		if (this.fileHandle) {
+			await requestAcessToFile(this.fileHandle)
 		}
 
 		const result = await saveToFile(

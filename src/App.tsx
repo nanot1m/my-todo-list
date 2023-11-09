@@ -15,16 +15,17 @@ import {
 	Text,
 	Textarea,
 } from "@chakra-ui/react"
+import { autorun } from "mobx"
 import { observer } from "mobx-react-lite"
 import { useEffect, useState } from "react"
 import {
 	AiFillFileAdd,
 	AiFillFileText,
-	AiOutlinePlus,
 	AiOutlineCheck,
 	AiOutlineClose,
 	AiOutlineDownload,
 	AiOutlineEdit,
+	AiOutlinePlus,
 } from "react-icons/ai"
 
 import { Task } from "./models/Task"
@@ -68,6 +69,14 @@ const Header = ({ stateStorage }: { stateStorage: StateStorage }) => {
 export const AutoSaveToggle = observer(
 	({ stateStorage }: { stateStorage: StateStorage }) => {
 		const [autoSave, setAutoSave] = useState(false)
+
+		useEffect(() => {
+			if (autoSave && stateStorage.fileHandle) {
+				return autorun(() => {
+					stateStorage.saveFile()
+				})
+			}
+		}, [autoSave, stateStorage])
 
 		return (
 			<Collapse in={Boolean(stateStorage.fileHandle)} animateOpacity>

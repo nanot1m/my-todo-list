@@ -9,9 +9,9 @@ export const TaskJSON = z.object({
 	title: z.string(),
 	description: z.string(),
 	status: z.nativeEnum(TaskStatus),
-	dueDate: z.date().nullable(),
-	createdAt: z.date(),
-	priority: z.number(),
+	dueDate: z.string().pipe(z.coerce.date()).nullable(),
+	createdAt: z.string().pipe(z.coerce.date()),
+	priority: z.union([z.number().int().min(0), z.undefined()]),
 })
 
 export class Task {
