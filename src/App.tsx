@@ -11,19 +11,24 @@ import {
 	Heading,
 	Icon,
 	IconButton,
+	Input,
 	Text,
+	Textarea,
 } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import { useEffect, useState } from "react"
 import {
 	AiFillFileAdd,
 	AiFillFileText,
+	AiOutlinePlus,
+	AiOutlineCheck,
+	AiOutlineClose,
 	AiOutlineDownload,
+	AiOutlineEdit,
 } from "react-icons/ai"
 
 import { Task } from "./models/Task"
 import { TaskList } from "./models/TaskList"
-import { TaskStatus } from "./models/TaskStatus"
 import { StateStorage } from "./storage/state-storage"
 
 const Header = ({ stateStorage }: { stateStorage: StateStorage }) => {
@@ -84,24 +89,128 @@ export const AutoSaveToggle = observer(
 	},
 )
 
+export const TaskEditView = ({
+	task,
+	onSubmit,
+	onCancel,
+}: {
+	task?: Task
+	onSubmit(data: { title: string; description: string }): void
+	onCancel(): void
+}) => {
+	const [title, setTitle] = useState(task?.title ?? "")
+	const [description, setDescription] = useState(task?.description ?? "")
+
+	return (
+		<Card>
+			<CardHeader>
+				<Input
+					placeholder="Title"
+					defaultValue={task?.title}
+					onChange={(e) => {
+						setTitle(e.currentTarget.value)
+					}}
+				/>
+			</CardHeader>
+			<CardBody>
+				<Textarea
+					placeholder="Description"
+					defaultValue={task?.description}
+					onChange={(e) => {
+						setDescription(e.currentTarget.value)
+					}}
+				/>
+			</CardBody>
+			<CardFooter>
+				<HStack>
+					<IconButton
+						aria-label="Cancel"
+						title="Cancel"
+						icon={<Icon as={AiOutlineClose} />}
+						onClick={onCancel}
+					/>
+					<IconButton
+						aria-label="Save"
+						title="Save"
+						icon={<Icon as={AiOutlineCheck} />}
+						onClick={() => {
+							onSubmit({
+								title: title.trim(),
+								description: description.trim(),
+							})
+						}}
+					/>
+				</HStack>
+			</CardFooter>
+		</Card>
+	)
+}
+
 export const TaskView = observer(({ task }: { task: Task }) => {
+	const [isEditing, setIsEditing] = useState(false)
+
+	if (isEditing) {
+		return (
+			<TaskEditView
+				task={task}
+				onSubmit={(data) => {
+					task.setTitle(data.title)
+					task.setDescription(data.description)
+					setIsEditing(false)
+				}}
+				onCancel={() => {
+					setIsEditing(false)
+				}}
+			/>
+		)
+	}
+
 	return (
 		<Card>
 			<CardHeader>{task.title}</CardHeader>
 			<CardBody>{task.description}</CardBody>
 			<CardFooter>
-				<Checkbox
-					checked={task.done}
-					onChange={(e) =>
-						task.setStatus(
-							e.currentTarget.checked
-								? TaskStatus.DONE
-								: TaskStatus.OPEN,
-						)
-					}
-				>
-					Done
-				</Checkbox>
+				<IconButton
+					aria-label="Edit task"
+					title="Edit task"
+					icon={<Icon as={AiOutlineEdit} />}
+					onClick={() => setIsEditing(!isEditing)}
+				/>
+			</CardFooter>
+		</Card>
+	)
+})
+
+export const NewTaskView = observer(({ taskList }: { taskList: TaskList }) => {
+	const [isEditing, setIsEditing] = useState(false)
+
+	if (isEditing) {
+		return (
+			<TaskEditView
+				onSubmit={(data) => {
+					taskList.createTaskWithTextAndDescription(
+						data.title,
+						data.description,
+					)
+					setIsEditing(false)
+				}}
+				onCancel={() => {
+					setIsEditing(false)
+				}}
+			/>
+		)
+	}
+
+	return (
+		<Card>
+			<CardHeader>New task</CardHeader>
+			<CardFooter>
+				<IconButton
+					aria-label="Add task"
+					title="Add task"
+					icon={<Icon as={AiOutlinePlus} />}
+					onClick={() => setIsEditing(!isEditing)}
+				/>
 			</CardFooter>
 		</Card>
 	)
@@ -113,6 +222,7 @@ export const TaskListView = observer(({ taskList }: { taskList: TaskList }) => {
 			{taskList.tasks.map((task) => (
 				<TaskView key={task.id} task={task} />
 			))}
+			<NewTaskView taskList={taskList} />
 		</Box>
 	)
 })

@@ -5,7 +5,7 @@ import { TaskStatus } from "./TaskStatus"
 
 export type TaskJSON = z.infer<typeof TaskJSON>
 export const TaskJSON = z.object({
-	id: z.number(),
+	id: z.string(),
 	title: z.string(),
 	description: z.string(),
 	status: z.nativeEnum(TaskStatus),
@@ -15,7 +15,7 @@ export const TaskJSON = z.object({
 })
 
 export class Task {
-	readonly id: number
+	readonly id: string
 	@observable accessor title: string
 	@observable accessor description: string
 	@observable accessor status: TaskStatus
@@ -24,7 +24,7 @@ export class Task {
 	@observable accessor priority: number
 
 	constructor(
-		id: number,
+		id: string,
 		title: string,
 		description: string,
 		status: TaskStatus,

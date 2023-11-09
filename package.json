@@ -18,6 +18,7 @@
 		"idb-keyval": "^6.2.1",
 		"mobx": "6.11.0-pre",
 		"mobx-react-lite": "^4.0.5",
+		"nanoid": "^5.0.3",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-icons": "^4.11.0",

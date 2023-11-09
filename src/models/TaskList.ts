@@ -1,4 +1,5 @@
 import { action, computed, observable } from "mobx"
+import { nanoid } from "nanoid"
 import { z } from "zod"
 
 import { Task, TaskJSON } from "./Task"
@@ -21,7 +22,7 @@ function tasksCompareFn(a: Task, b: Task): number {
 export class TaskList {
 	@observable accessor tasks: Task[]
 
-	constructor(tasks: Task[]) {
+	constructor(tasks: Task[], private readonly getId: () => string = nanoid) {
 		this.tasks = tasks
 	}
 
@@ -30,6 +31,17 @@ export class TaskList {
 		return this.tasks
 			.filter((task) => task.status === TaskStatus.OPEN)
 			.sort(tasksCompareFn)
+	}
+
+	@action
+	createTaskWithTextAndDescription(
+		text: string,
+		description: string,
+		taskStatus: TaskStatus = TaskStatus.OPEN,
+	) {
+		this.addTask(
+			new Task(this.getId(), text, description, taskStatus, new Date()),
+		)
 	}
 
 	@action
